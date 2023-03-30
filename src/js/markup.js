@@ -7,7 +7,7 @@ export default function renderCard({
   comments,
   downloads,
 }) {
-  return (markup = `
+  return `
     <a class="gallery__link" href="${largeImageURL}">
       <div class="gallery-item">
         <img class="gallery-item__img" src="${webformatURL}" alt="${tags}" loading="lazy" />
@@ -19,5 +19,5 @@ export default function renderCard({
         </div>
       </div>
     </a>
-  `);
+  `;
 }

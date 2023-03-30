@@ -1,50 +1,101 @@
-// import './css/styles.css';
-// import Notiflix from 'notiflix';
+import './sass/main.css';
+import Notiflix from 'notiflix';
+import ApiService from './js/api-service';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+import renderCard from './js/markup';
 
-import axios from 'axios';
+// ============================== Selectors ===================================
 
-// const query = document.querySelector('#search');
-// const button = document.querySelector('#button');
-// const box = document.querySelector('.box');
+const form = document.querySelector('#search-form');
+const loadMoreBtn = document.querySelector('.load-more');
+const gallery = document.querySelector('.gallery');
 
-// button.addEventListener('click', onclick);
+const apiService = new ApiService();
+const AMOUNT_OF_PAGES = 40;
 
-// function onclick { };
+// ============================== Search ======================================
 
-// fetch(`${BASE_URL}=cats&image_type=photo`)
-//   .then(response => response.json())
-//   .then(resultResp => {
-//     // console.log(resultResp);
-//     const arraOfData = resultResp.hits;
-//     const markup = arraOfData.map(
-//       ({ previewURL, pageURL, tags, likes, views, comments, downloads }) => {
-//         console.log(`
-//     <img src="${previewURL}" alt="${tags}" class="webformatURL"/>
-//     <img src="${pageURL}" alt="${tags}" class="largeImageURL"/>
-//       <h2 class="tags">опис: ${tags}</h2>
-//       <p class="likes">кількість лайків: ${likes}</p>
-//       <p class="views">кількість переглядів: ${views}</p>
-//       <p class="comments">кількість коментарів: ${comments}</p>
-//       <p class="downloads">кількість завантажень: ${downloads}</p>`);
-//       }
-//     );
-//   })
-//   .catch(e => console.log(e));
-// box.insertAdjacentHTML(beforeend, markup);
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  gallery.innerHTML = '';
+  apiService.resetPage();
+  apiService.query = e.currentTarget.elements.searchQuery.value;
+  window.addEventListener('scroll', onScroll);
+  showCards();
+});
 
-const config = {
-  method: 'get',
-  url: 'https://pixabay.com/api/',
-  responseType: 'json',
-  params: {
-    q: 'cats',
-    key: '34845397-6a8ea04ff885abb1fbb7f7c21',
-  },
-};
+// ============================ Load more =====================================
 
-async function fetchData() {
-  const response = await axios.get(config);
-  // const data = await response.json();
-  // console.log(response);
-  // return data;
+// loadMoreBtn.addEventListener('click', () => {
+//   showCards();
+// });
+
+// Infinite scroll
+
+function onScroll() {
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+  if (scrollTop + clientHeight >= scrollHeight) {
+    showCards();
+  }
+}
+
+// ============================ Add cards =====================================
+
+async function showCards() {
+  let cards;
+  let totalHits;
+  try {
+    const response = await apiService.fetchArticles(AMOUNT_OF_PAGES);
+    cards = response.data.hits;
+    totalHits = response.data.totalHits;
+  } catch (error) {
+    console.log(error.response.status);
+    return;
+  }
+  // -------------------------- Messages & conditions -------------------------
+
+  const hasResultsOnSecondPage = totalHits > 0 && apiService.page === 2;
+  const hasNoCards = cards.length === 0;
+  const amountOfPages =
+    Math.ceil(totalHits / AMOUNT_OF_PAGES) - apiService.page;
+  console.log(Math.ceil(totalHits / AMOUNT_OF_PAGES) - apiService.page);
+
+  const successMessage = `Hooray! We found ${totalHits} images.`;
+  const noResultsMessage =
+    'Sorry, there are no images matching your search query. Please try again.';
+  const endOfResultsMessage =
+    "We're sorry, but you've reached the end of search results.";
+
+  if (hasResultsOnSecondPage) {
+    Notiflix.Notify.success(successMessage);
+  }
+
+  if (hasNoCards) {
+    Notiflix.Notify.failure(noResultsMessage);
+    return;
+  }
+
+  if (amountOfPages === -1) {
+    Notiflix.Notify.warning(endOfResultsMessage);
+    loadMoreBtn.style.display = 'none';
+    window.removeEventListener('scroll', onScroll);
+  } else {
+    //  uncomment for "Load Butещт"
+    // loadMoreBtn.style.display = 'block';
+  }
+
+  // ------------------------------ Rebder Cards ------------------------------
+
+  const cardsMarkup = cards.map(renderCard).join('');
+  gallery.insertAdjacentHTML('beforeend', cardsMarkup);
+  lightbox.refresh();
+}
+
+// =========================  SimpleLightbox ==================================
+
+gallery.addEventListener('click', onImageClick);
+const lightbox = new SimpleLightbox('.gallery a');
+function onImageClick(e) {
+  e.preventDefault();
 }

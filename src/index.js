@@ -50,7 +50,7 @@ async function showCards() {
     cards = response.data.hits;
     totalHits = response.data.totalHits;
   } catch (error) {
-    console.log(error.response.status);
+    console.log(error.response);
     return;
   }
   // -------------------------- Messages & conditions -------------------------

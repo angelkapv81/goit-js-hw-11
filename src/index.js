@@ -1,8 +1,8 @@
 import './sass/main.css';
 import Notiflix from 'notiflix';
 import ApiService from './js/api-service';
-import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import SimpleLightbox from 'simplelightbox';
 import renderCard from './js/markup';
 
 // ============================== Selectors ===================================

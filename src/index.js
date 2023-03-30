@@ -12,7 +12,7 @@ const loadMoreBtn = document.querySelector('.load-more');
 const gallery = document.querySelector('.gallery');
 
 const apiService = new ApiService();
-const AMOUNT_OF_PAGES = 50;
+const AMOUNT_OF_PAGES = 40;
 
 // ============================== Search ======================================
 
